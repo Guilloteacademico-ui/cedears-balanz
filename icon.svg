@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0A0A0F"/>
+  <rect x="40" y="40" width="432" height="432" rx="80" fill="#12121A"/>
+  <!-- Chart bars -->
+  <rect x="80" y="280" width="60" height="150" rx="8" fill="#4D9EFF"/>
+  <rect x="160" y="220" width="60" height="210" rx="8" fill="#2ECC8A"/>
+  <rect x="240" y="160" width="60" height="270" rx="8" fill="#4D9EFF"/>
+  <rect x="320" y="200" width="60" height="230" rx="8" fill="#2ECC8A"/>
+  <rect x="400" y="120" width="60" height="310" rx="8" fill="#A855F7"/>
+  <!-- Trend line -->
+  <polyline points="110,280 190,220 270,160 350,200 430,120"
+    fill="none" stroke="#FFB830" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dots -->
+  <circle cx="110" cy="280" r="10" fill="#FFB830"/>
+  <circle cx="190" cy="220" r="10" fill="#FFB830"/>
+  <circle cx="270" cy="160" r="10" fill="#FFB830"/>
+  <circle cx="350" cy="200" r="10" fill="#FFB830"/>
+  <circle cx="430" cy="120" r="10" fill="#FFB830"/>
+  <!-- Label -->
+  <text x="256" y="500" text-anchor="middle" font-family="monospace" font-size="0" fill="#4D9EFF">C</text>
+</svg>
