@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CEDEARs">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="manifest" href="manifest.json">
+<title>CEDEARs · Balanz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap');
+:root{
+  --bg:#F0F2F5;--surface:#FFFFFF;--border:#B0BAC8;
+  --text:#0A0A0A;--muted:#3A3A3A;
+  --blue:#0057CC;--blue-bg:#D6E8FF;--blue-dark:#003D99;
+  --green:#005C24;--green-bg:#C2F0D0;
+  --red:#BB0000;--red-bg:#FFD0D0;
+  --gold:#6B3D00;--gold-bg:#FFE5A0;
+  --purple:#4A0099;--purple-bg:#E8D0FF;
+  --orange:#8B3A00;--orange-bg:#FFE0C0;
+  --sans:'Nunito',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── HEADER ── */
+.header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:3px solid var(--blue);padding:env(safe-area-inset-top,0) 0 0;box-shadow:0 2px 12px rgba(0,0,0,0.12)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 18px}
+.app-name{font-size:20px;font-weight:900;color:var(--blue);letter-spacing:-0.5px}
+.app-sub{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px}
+.header-btns{display:flex;gap:8px}
+.hbtn{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;border:none;transition:all 0.15s}
+.hbtn:active{transform:scale(0.92)}
+.hbtn-refresh{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(0,87,204,0.35)}
+.hbtn-refresh.spinning{animation:spin 0.7s linear infinite}
+.hbtn-add{background:var(--green-bg);color:var(--green);border:2px solid var(--green)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MARKET BANNER ── */
+.market-banner{margin:10px 16px;padding:14px 16px;border-radius:14px;border:2px solid;display:flex;align-items:center;gap:12px}
+.market-banner-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.market-banner-info{flex:1}
+.market-banner-title{font-size:16px;font-weight:900;letter-spacing:0.3px}
+.market-banner-sub{font-size:13px;font-weight:700;color:var(--muted);margin-top:2px}
+.market-banner-time{font-family:var(--mono);font-size:13px;font-weight:700;text-align:right;flex-shrink:0}
+
+/* ── SCROLL ── */
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 0 calc(env(safe-area-inset-bottom,0)+90px)}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:flex;gap:10px;padding:0 16px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px}
+.kpi-strip::-webkit-scrollbar{display:none}
+.kpi-card{flex:0 0 auto;min-width:138px;background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:13px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+.kpi-label{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.kpi-value{font-size:26px;font-weight:900;font-family:var(--mono);letter-spacing:-1px;line-height:1}
+.kpi-sub{font-size:13px;color:var(--muted);font-weight:700;margin-top:4px}
+
+/* ── TC BAR ── */
+.tc-bar{margin:0 16px 14px;background:var(--gold-bg);border:2px solid var(--gold);border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.tc-label{font-size:13px;font-weight:800;color:var(--gold)}
+.tc-src{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px}
+.tc-val{font-size:22px;font-family:var(--mono);font-weight:900;color:var(--gold)}
+
+/* ── SECTION HDR ── */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:10px}
+.section-hdr .title{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.sort-btn{font-size:13px;color:var(--blue);font-weight:800;padding:5px 11px;border-radius:8px;background:var(--blue-bg);border:2px solid var(--blue);cursor:pointer;-webkit-appearance:none}
+
+/* ── CARDS ── */
+.cards{padding:0 16px;display:flex;flex-direction:column;gap:12px}
+.pos-card{background:var(--surface);border:2px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.07);transition:all 0.15s}
+.pos-card:active{transform:scale(0.985)}
+
+/* market state strip on top of card */
+.card-market-strip{padding:7px 16px;font-size:13px;font-weight:900;letter-spacing:1px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(0,0,0,0.06)}
+.card-market-strip .strip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.card-market-strip .strip-price{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700}
+
+.card-body{padding:16px;cursor:pointer}
+.card-row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.ticker{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue);letter-spacing:0.5px}
+.company{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px}
+.price-block{text-align:right}
+.price-main{font-family:var(--mono);font-size:26px;font-weight:900;letter-spacing:-0.5px}
+.price-label{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
+.change{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:4px;padding:3px 8px;border-radius:8px;display:inline-block;border:2px solid}
+.change.up{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.change.down{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.change.flat{background:var(--bg);color:var(--muted);border-color:var(--border)}
+
+/* ganancia/perdida badge */
+.pnl-badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-family:var(--mono);font-weight:800;padding:3px 9px;border-radius:8px;border:2px solid;margin-top:4px}
+.pnl-badge.gain{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.pnl-badge.loss{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.pnl-badge.even{background:var(--bg);color:var(--muted);border-color:var(--border)}
+
+/* progress */
+.progress-section{display:flex;flex-direction:column;gap:9px}
+.prog-row{display:flex;align-items:center;gap:9px}
+.prog-label{font-size:13px;color:var(--muted);font-weight:800;width:68px;flex-shrink:0;text-transform:uppercase;letter-spacing:0.3px}
+.prog-bar{flex:1;height:10px;background:var(--bg);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+.prog-fill{height:100%;border-radius:5px;transition:width 0.6s ease}
+.prog-pct{font-size:13px;font-family:var(--mono);font-weight:800;width:50px;text-align:right;flex-shrink:0}
+
+/* footer */
+.card-footer{display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:2px solid var(--bg)}
+.foot-item{display:flex;flex-direction:column}
+.foot-item:last-child{align-items:flex-end}
+.foot-item:nth-child(2){align-items:center}
+.foot-label{font-size:13px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.3px}
+.foot-val{font-size:16px;font-family:var(--mono);font-weight:800;margin-top:2px}
+
+/* detail panel */
+.detail-panel{display:none;padding:14px 16px;border-top:2px solid var(--bg);background:var(--bg);animation:slideDown 0.2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.pos-card.expanded .detail-panel{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.detail-item{background:var(--surface);border-radius:12px;padding:11px;border:1px solid var(--border)}
+.d-label{font-size:13px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.3px}
+.d-val{font-size:15px;font-family:var(--mono);font-weight:800;margin-top:3px}
+
+/* 3 prices row */
+.three-prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+.price-box{background:var(--surface);border-radius:10px;padding:10px;border:2px solid var(--border);text-align:center}
+.price-box.active-price{border-color:var(--blue);background:var(--blue-bg)}
+.price-box .pb-label{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px}
+.price-box .pb-val{font-size:14px;font-family:var(--mono);font-weight:900}
+.price-box .pb-na{font-size:13px;color:var(--muted);font-weight:700}
+
+.rating-pill{display:inline-block;padding:5px 14px;border-radius:20px;font-size:13px;font-family:var(--mono);font-weight:800;letter-spacing:1px;border:2px solid;margin-right:8px}
+.rating-pill.STRONGBUY{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.rating-pill.BUY{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+.rating-pill.HOLD{background:var(--gold-bg);color:var(--gold);border-color:var(--gold)}
+
+/* action buttons on card */
+.card-actions{display:flex;gap:8px;margin-top:12px}
+.card-btn{flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:800;font-family:var(--sans);border:2px solid;cursor:pointer;-webkit-appearance:none;transition:all 0.15s}
+.card-btn:active{transform:scale(0.95)}
+.card-btn-edit{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+.card-btn-del{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease}
+.modal-overlay.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0)+24px);width:100%;max-width:500px;animation:slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:20px;font-weight:900;color:var(--text);margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-size:16px;font-family:var(--sans);font-weight:700;color:var(--text);background:#fff;-webkit-appearance:none;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--blue)}
+.form-input::placeholder{color:#AAAAAA;font-weight:600}
+.form-hint{font-size:13px;color:var(--muted);font-weight:700;margin-top:5px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.modal-btn{flex:1;padding:14px;border-radius:14px;font-size:16px;font-weight:900;font-family:var(--sans);border:none;cursor:pointer;-webkit-appearance:none;transition:all 0.15s;min-height:52px}
+.modal-btn:active{transform:scale(0.96)}
+.modal-btn-cancel{background:var(--bg);color:var(--muted);border:2px solid var(--border)}
+.modal-btn-save{background:var(--blue);color:#fff;box-shadow:0 3px 12px rgba(0,87,204,0.35)}
+.modal-btn-danger{background:var(--red);color:#fff}
+
+/* edit mode tabs */
+.edit-tabs{display:flex;gap:8px;margin-bottom:16px}
+.edit-tab{flex:1;padding:13px;border-radius:10px;font-size:14px;font-weight:800;font-family:var(--sans);border:2px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;-webkit-appearance:none;transition:all 0.15s;min-height:48px}
+.edit-tab.active{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid var(--border);padding:10px 0 env(safe-area-inset-bottom,10px);display:flex;justify-content:space-around;box-shadow:0 -4px 16px rgba(0,0,0,0.1)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;padding:5px 22px;border-radius:12px}
+.nav-item.active{color:var(--blue)}
+.nav-icon{font-size:26px}
+
+/* ── LOADING ── */
+.loading-overlay{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity 0.4s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-logo{font-size:60px;margin-bottom:20px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.loading-text{font-size:20px;font-weight:900;color:var(--blue)}
+.loading-sub{font-size:14px;color:var(--muted);font-weight:700;margin-top:6px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0)+90px);left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A1A;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:all 0.3s;z-index:800;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── INSTALL BANNER ── */
+.install-banner{margin:0 16px 12px;background:var(--blue-bg);border:2px solid var(--blue);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.install-banner.hidden{display:none}
+.install-close{font-size:18px;color:var(--muted);cursor:pointer;margin-left:auto;padding:4px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="loading-logo">📈</div>
+  <div class="loading-text">CEDEARs · Balanz</div>
+  <div class="loading-sub">Cargando cartera...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL AGREGAR/EDITAR -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="cerrarModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">Agregar posición</div>
+
+    <!-- Tabs solo en modo editar -->
+    <div class="edit-tabs hidden" id="editTabs">
+      <button class="edit-tab active" id="tabSumar" onclick="setEditTab('sumar')">➕ Sumar compra</button>
+      <button class="edit-tab" id="tabReemplazar" onclick="setEditTab('reemplazar')">✏️ Reemplazar</button>
+    </div>
+
+    <div class="form-group" id="tickerGroup">
+      <label class="form-label">Ticker (símbolo NYSE)</label>
+      <input class="form-input" id="inputTicker" type="text" placeholder="Ej: AAPL, TSLA, MSFT" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <div class="form-hint">Ingresá el ticker exacto en inglés mayúsculas</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="labelCantidad">Cantidad de nominales</label>
+      <input class="form-input" id="inputCantidad" type="number" placeholder="Ej: 10" min="0.01" step="any">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Precio de compra (USD)</label>
+      <input class="form-input" id="inputPrecioCompra" type="number" placeholder="Ej: 125.50" min="0.01" step="any">
+      <div class="form-hint">Precio promedio al que compraste — para calcular ganancia/pérdida</div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="cerrarModalDirecto()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" id="modalSaveBtn" onclick="guardarPosicion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="modal-overlay hidden" id="deleteOverlay" onclick="cerrarDeleteModal(event)">
+  <div class="modal" id="deleteModal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">¿Eliminar posición?</div>
+    <p style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:20px" id="deleteMsg"></p>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="cerrarDeleteModalDirecto()">Cancelar</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="app-name">CEDEARs · Balanz</div>
+      <div class="app-sub" id="headerSub">Calculando...</div>
+    </div>
+    <div class="header-btns">
+      <div class="hbtn hbtn-add" onclick="abrirModalAgregar()" title="Agregar ticker">＋</div>
+      <div class="hbtn hbtn-refresh" id="refreshBtn" onclick="actualizarTodo()">↻</div>
+    </div>
+  </div>
+  <!-- MARKET BANNER -->
+  <div class="market-banner" id="marketBanner">
+    <div class="market-banner-dot" id="bannerDot"></div>
+    <div class="market-banner-info">
+      <div class="market-banner-title" id="bannerTitle">Detectando...</div>
+      <div class="market-banner-sub" id="bannerSub"></div>
+    </div>
+    <div class="market-banner-time" id="bannerTime"></div>
+  </div>
+</div>
+
+<div class="scroll">
+
+  <div class="install-banner" id="installBanner">
+    <div style="font-size:24px;flex-shrink:0">📲</div>
+    <div>
+      <div style="font-size:13px;font-weight:900;color:var(--blue)">Instalá como app</div>
+      <div style="font-size:13px;color:var(--muted);font-weight:700;margin-top:2px">Safari → Compartir ↑ → Agregar a inicio</div>
+    </div>
+    <div class="install-close" onclick="cerrarBanner()">✕</div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Capital USD</div>
+      <div class="kpi-value" id="kpiCapUSD" style="color:var(--blue)">—</div>
+      <div class="kpi-sub" id="kpiCapSub">cargando</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Capital ARS</div>
+      <div class="kpi-value" id="kpiCapARS" style="color:var(--purple)">—</div>
+      <div class="kpi-sub" id="kpiARSSub">TC BNA: —</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Var. Hoy USD</div>
+      <div class="kpi-value" id="kpiRend" style="color:var(--green)">—</div>
+      <div class="kpi-sub" id="kpiRendSub">vs precio compra</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Posiciones</div>
+      <div class="kpi-value" id="kpiPos" style="color:var(--gold)">—</div>
+      <div class="kpi-sub">activas</div>
+    </div>
+  </div>
+
+  <div class="tc-bar">
+    <div>
+      <div class="tc-label">Dólar BNA oficial</div>
+      <div class="tc-src" id="tcSrc">dolarapi.com</div>
+    </div>
+    <div class="tc-val" id="tcVal">$ —</div>
+  </div>
+
+  <div class="section-hdr">
+    <span class="title">Posiciones</span>
+    <button class="sort-btn" id="sortBtn" onclick="toggleSort()">Capital ↓</button>
+  </div>
+
+  <div class="cards" id="cardsContainer"></div>
+
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="setView('cartera')"><span class="nav-icon">📊</span><span>Cartera</span></div>
+  <div class="nav-item" onclick="setView('objetivos')"><span class="nav-icon">🎯</span><span>Objetivos</span></div>
+  <div class="nav-item" onclick="verHorario()"><span class="nav-icon">🕐</span><span>Horario</span></div>
+</div>
+
+<script>
+// ── CARTERA INICIAL (por defecto) ─────────────────────────────
+const CARTERA_DEFAULT = [
+  {ticker:'NOK', empresa:'Nokia Corp.',        nom:7,  precioCompra:null, maxHist:62.00,  max52w:8.82,   pObj:8.28,  rating:'BUY'},
+  {ticker:'NVDA',empresa:'NVIDIA Corporation', nom:18, precioCompra:null, maxHist:212.19, max52w:212.19, pObj:269.16,rating:'STRONG BUY'},
+  {ticker:'GOOGL',empresa:'Alphabet (Google)', nom:19, precioCompra:null, maxHist:349.00, max52w:349.00, pObj:376.29,rating:'STRONG BUY'},
+  {ticker:'INTC',empresa:'Intel Corporation',  nom:6,  precioCompra:null, maxHist:75.81,  max52w:58.59,  pObj:44.60, rating:'HOLD'},
+  {ticker:'NIO', empresa:'NIO Inc.',           nom:12, precioCompra:null, maxHist:62.84,  max52w:8.02,   pObj:6.73,  rating:'BUY'},
+  {ticker:'AMD', empresa:'Adv. Micro Devices', nom:5,  precioCompra:null, maxHist:267.08, max52w:267.08, pObj:260.85,rating:'BUY'},
+  {ticker:'BB',  empresa:'BlackBerry Ltd.',    nom:2,  precioCompra:null, maxHist:25.10,  max52w:5.32,   pObj:4.92,  rating:'HOLD'},
+  {ticker:'CAT', empresa:'Caterpillar Inc.',   nom:1,  precioCompra:null, maxHist:790.44, max52w:789.81, pObj:737.55,rating:'HOLD'},
+];
+
+// ── ESTADO ────────────────────────────────────────────────────
+let state = {
+  cartera: cargarCartera(),
+  tc: null,
+  precios: {},       // { TICKER: { price, change, preMarket, postMarket, marketState } }
+  ultimaAct: null,
+  sortBy: 'capital',
+  view: 'cartera',
+  editTab: 'sumar',
+  editingTicker: null,
+  deletingTicker: null,
+};
+
+const CARTERA_VERSION = '2'; // incrementar para forzar reset
+
+function cargarCartera() {
+  try {
+    const version = localStorage.getItem('cartera_version');
+    // Si la versión cambió, limpiar datos viejos (precios en pesos)
+    if (version !== CARTERA_VERSION) {
+      localStorage.removeItem('cartera_cedears');
+      localStorage.setItem('cartera_version', CARTERA_VERSION);
+      return JSON.parse(JSON.stringify(CARTERA_DEFAULT));
+    }
+    const s = localStorage.getItem('cartera_cedears');
+    if (s) {
+      const cartera = JSON.parse(s);
+      // Sanitizar: si algún precioCompra parece ser precio en pesos (<50 para NVDA/GOOGL/CAT),
+      // lo reseteamos a null para que se tome el precio actual
+      cartera.forEach(p => {
+        const tickersAltos = ['NVDA','GOOGL','AMD','CAT','INTC'];
+        if (tickersAltos.includes(p.ticker) && p.precioCompra !== null && p.precioCompra < 50) {
+          p.precioCompra = null; // precio en pesos detectado, resetear
+        }
+        // Para todos: si precioCompra es 0 o negativo, resetear
+        if (p.precioCompra !== null && p.precioCompra <= 0) {
+          p.precioCompra = null;
+        }
+      });
+      return cartera;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(CARTERA_DEFAULT));
+}
+
+function guardarCarteraLS() {
+  try { localStorage.setItem('cartera_cedears', JSON.stringify(state.cartera)); } catch(e) {}
+}
+
+// ── FETCH PRECIOS ─────────────────────────────────────────────
+async function fetchPrecio(ticker) {
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d&includePrePost=true&_=${Date.now()}`;
+  
+  // Estrategias en orden: directo, allorigins, corsproxy
+  const estrategias = [
+    // 1. Directo (funciona en algunos casos)
+    async () => {
+      const r = await fetch(yahooUrl, { headers:{ 'Accept':'application/json' } });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    },
+    // 2. allorigins proxy (más confiable para móviles)
+    async () => {
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
+      if (!r.ok) throw new Error('allorigins error');
+      const d = await r.json();
+      return JSON.parse(d.contents);
+    },
+    // 3. corsproxy.io
+    async () => {
+      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`);
+      if (!r.ok) throw new Error('corsproxy error');
+      return await r.json();
+    },
+    // 4. query2 directo
+    async () => {
+      const url2 = yahooUrl.replace('query1','query2');
+      const r = await fetch(url2, { headers:{ 'Accept':'application/json' } });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    },
+  ];
+
+  for (const estrategia of estrategias) {
+    try {
+      const d = await estrategia();
+      if (!d?.chart?.result?.[0]) continue;
+      const m = d.chart.result[0].meta;
+      if (!m.regularMarketPrice) continue;
+      return {
+        price:       m.regularMarketPrice        || null,
+        change:      m.regularMarketChangePercent || 0,
+        preMarket:   m.preMarketPrice             || null,
+        preChange:   m.preMarketChangePercent     || null,
+        postMarket:  m.postMarketPrice            || null,
+        postChange:  m.postMarketChangePercent    || null,
+        marketState: m.marketState                || 'CLOSED',
+        name:        m.shortName                  || ticker,
+      };
+    } catch(e) { continue; }
+  }
+  return { price:null, change:0, preMarket:null, preChange:null, postMarket:null, postChange:null, marketState:'CLOSED', name:ticker };
+}
+
+async function fetchBNA() {
+  const bnaUrl = 'https://dolarapi.com/v1/dolares/oficial';
+  const estrategias = [
+    async () => { const r = await fetch(bnaUrl); if(!r.ok) throw new Error(); return await r.json(); },
+    async () => {
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(bnaUrl)}`);
+      if(!r.ok) throw new Error();
+      const d = await r.json();
+      return JSON.parse(d.contents);
+    },
+    async () => {
+      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(bnaUrl)}`);
+      if(!r.ok) throw new Error();
+      return await r.json();
+    },
+  ];
+  for (const e of estrategias) {
+    try {
+      const d = await e();
+      if (d?.compra && d?.venta) return (d.compra + d.venta) / 2;
+    } catch(e) { continue; }
+  }
+  return null;
+}
+
+// ── HORARIO ───────────────────────────────────────────────────
+function horario() {
+  const arg = new Date(new Date().toLocaleString('en-US',{timeZone:'America/Argentina/Buenos_Aires'}));
+  const hh  = arg.getHours() + arg.getMinutes()/60;
+  const dia  = arg.getDay();
+  const timeStr = arg.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+  if (dia===0||dia===6) return {
+    key:'closed', label:'Mercado cerrado', sub:'Fin de semana — reabre el lunes 10:30',
+    color:'var(--red)', dot:'#BB0000', bg:'var(--red-bg)', border:'var(--red)', time:timeStr
+  };
+  if (hh>=8 && hh<10.5) return {
+    key:'pre', label:'⚡ PRE-MARKET', sub:'Estás viendo precios previos a la apertura · 08:00–10:30 ARG',
+    color:'var(--orange)', dot:'#8B3A00', bg:'var(--orange-bg)', border:'var(--orange)', time:timeStr
+  };
+  if (hh>=10.5 && hh<17) return {
+    key:'regular', label:'✅ MERCADO ABIERTO', sub:'Precios en tiempo real · 10:30–17:00 ARG',
+    color:'var(--green)', dot:'#005C24', bg:'var(--green-bg)', border:'var(--green)', time:timeStr
+  };
+  if (hh>=17 && hh<21) return {
+    key:'post', label:'🌙 POST-MARKET', sub:'Estás viendo precios después del cierre · 17:00–21:00 ARG',
+    color:'var(--purple)', dot:'#4A0099', bg:'var(--purple-bg)', border:'var(--purple)', time:timeStr
+  };
+  return {
+    key:'closed', label:'Mercado cerrado', sub:'Horario: 10:30–17:00 ARG (Lun–Vie)',
+    color:'var(--muted)', dot:'#3A3A3A', bg:'var(--bg)', border:'var(--border)', time:timeStr
+  };
+}
+
+// precio activo según estado de mercado
+function precioActivo(pr) {
+  if (!pr) return null;
+  const ms = pr.marketState;
+  // PRE-MARKET: usar preMarketPrice si existe y es mayor a 0
+  if ((ms === 'PRE' || ms === 'PREPRE') && pr.preMarket && pr.preMarket > 0) {
+    return { val: pr.preMarket, change: pr.preChange || 0, tipo: 'pre' };
+  }
+  // POST-MARKET: usar postMarketPrice si existe y es mayor a 0
+  if ((ms === 'POST' || ms === 'POSTPOST') && pr.postMarket && pr.postMarket > 0) {
+    return { val: pr.postMarket, change: pr.postChange || 0, tipo: 'post' };
+  }
+  // MERCADO REGULAR: usar regularMarketPrice
+  if (pr.price && pr.price > 0) {
+    return { val: pr.price, change: pr.change || 0, tipo: 'regular' };
+  }
+  // Fallback: si hay preMarket o postMarket aunque no sea el estado correcto
+  if (pr.preMarket && pr.preMarket > 0) return { val: pr.preMarket, change: pr.preChange || 0, tipo: 'pre' };
+  if (pr.postMarket && pr.postMarket > 0) return { val: pr.postMarket, change: pr.postChange || 0, tipo: 'post' };
+  return null;
+}
+
+// ── ACTUALIZAR ────────────────────────────────────────────────
+async function actualizarTodo() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  document.getElementById('headerSub').textContent = 'Actualizando...';
+  renderBanner({
+    label:'Actualizando precios...', sub:'Conectando con Yahoo Finance',
+    color:'var(--blue)', dot:'#0057CC', bg:'var(--blue-bg)', border:'var(--blue)', time:''
+  });
+
+  let exitosos = 0, fallidos = 0;
+
+  try {
+    const tickers = state.cartera.map(p => p.ticker);
+
+    // Fetch en paralelo con timeout individual de 12s
+    const fetchConTimeout = (fn, ms=12000) =>
+      Promise.race([fn(), new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
+
+    const [tc, ...precios] = await Promise.all([
+      fetchConTimeout(() => fetchBNA()),
+      ...tickers.map(t => fetchConTimeout(() => fetchPrecio(t)).catch(() =>
+        ({ price:null, change:0, preMarket:null, postMarket:null, marketState:'CLOSED', name:t })
+      ))
+    ]);
+
+    // Actualizar TC
+    if (tc && !tc.message) {
+      state.tc = tc;
+      document.getElementById('tcVal').textContent =
+        '$'+tc.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      document.getElementById('tcSrc').textContent =
+        'dolarapi.com · '+new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    }
+
+    // Actualizar precios
+    tickers.forEach((t,i) => {
+      const pr = precios[i];
+      if (pr && (pr.price > 0 || pr.preMarket > 0 || pr.postMarket > 0)) {
+        state.precios[t] = pr;
+        exitosos++;
+        const pos = state.cartera.find(p=>p.ticker===t);
+        if (pos) {
+          if (pr.name && pr.name !== t) pos.empresa = pr.name;
+          // Fijar precio base si no tiene uno aún
+          if (!pos.precioCompra || pos.precioCompra <= 0) {
+            const pa = precioActivo(pr);
+            if (pa?.val && pa.val > 0) {
+              pos.precioCompra = pa.val;
+            }
+          }
+        }
+      } else {
+        fallidos++;
+      }
+    });
+
+    // Guardar y renderizar
+    guardarCarteraLS();
+    state.ultimaAct = new Date();
+
+    // Forzar re-render completo
+    renderKPIs();
+    renderCards();
+    renderHeader();
+
+    // Feedback al usuario
+    const hora = state.ultimaAct.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    if (exitosos === 0) {
+      mostrarToast('⚠️ Sin conexión — reintentá en un momento');
+    } else if (fallidos > 0) {
+      mostrarToast(`✅ ${exitosos} actualizados · ${fallidos} sin datos · ${hora}`);
+    } else {
+      mostrarToast(`✅ ${exitosos} cotizaciones actualizadas · ${hora}`);
+    }
+
+  } catch(e) {
+    console.error('actualizarTodo error:', e);
+    mostrarToast('❌ Error al actualizar — verificá tu conexión');
+  }
+
+  btn.classList.remove('spinning');
+  renderBanner(horario());
+}
+
+// ── RENDER PRINCIPAL ──────────────────────────────────────────
+function renderizarTodo() { renderKPIs(); renderCards(); renderHeader(); }
+
+function totalCapital() {
+  return state.cartera.reduce((s,p) => {
+    const pr = state.precios[p.ticker];
+    const pa = pr ? precioActivo(pr) : null;
+    const precio = pa?.val || (p.precioCompra || 0);
+    return s + precio * p.nom;
+  }, 0);
+}
+
+function renderHeader() {
+  document.getElementById('headerSub').textContent = 'Total: $'+fmt(totalCapital(),0)+' USD';
+}
+
+function renderBanner(h) {
+  const b = document.getElementById('marketBanner');
+  b.style.background   = h.bg   || 'var(--bg)';
+  b.style.borderColor  = h.border|| 'var(--border)';
+  document.getElementById('bannerDot').style.background = h.dot;
+  document.getElementById('bannerTitle').textContent    = h.label;
+  document.getElementById('bannerTitle').style.color    = h.color;
+  document.getElementById('bannerSub').textContent      = h.sub || '';
+  document.getElementById('bannerTime').textContent     = h.time || '';
+  document.getElementById('bannerTime').style.color     = h.color;
+}
+
+function renderKPIs() {
+  const total  = totalCapital();
+  // Variación del día en USD (suma de todos los tickers)
+  const pnlUSD = state.cartera.reduce((s,p) => {
+    const pr = state.precios[p.ticker];
+    const pa = pr ? precioActivo(pr) : null;
+    if (!pa?.val || pa.val <= 0) return s;
+    return s + pa.val * p.nom * ((pr.change||0)/100);
+  }, 0);
+  const hayPnL = state.cartera.some(p => state.precios[p.ticker]?.price > 0);
+
+  document.getElementById('kpiCapUSD').textContent = '$'+fmt(total,0);
+  document.getElementById('kpiCapSub').textContent = state.ultimaAct
+    ? 'act. '+state.ultimaAct.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}) : 'datos base';
+
+  if (state.tc) {
+    document.getElementById('kpiCapARS').textContent = '$'+fmt(total*state.tc/1000,0)+'K';
+    document.getElementById('kpiARSSub').textContent = 'TC: $'+fmt(state.tc,0);
+  }
+
+  const rc  = document.getElementById('kpiRend');
+  const rcs = document.getElementById('kpiRendSub');
+  if (!hayPnL) {
+    rc.style.color  = 'var(--muted)';
+    rc.textContent  = '—';
+    rcs.textContent = 'actualizá para calcular';
+  } else {
+    rc.style.color  = pnlUSD >= 0 ? 'var(--green)' : 'var(--red)';
+    rc.textContent  = (pnlUSD>=0?'+':'') + '$' + fmt(Math.abs(pnlUSD),0);
+    rcs.textContent = 'variación del día';
+  }
+
+  document.getElementById('kpiPos').textContent = state.cartera.length;
+}
+
+function renderCards() {
+  const h = horario();
+  let data = state.cartera.map(p => {
+    const pr   = state.precios[p.ticker];
+    const pa   = pr ? precioActivo(pr) : null;
+    const precio = (pa?.val && pa.val > 0) ? pa.val : 0;
+    const change = pa?.change || 0;
+    const tienePrecioBase = p.precioCompra !== null && p.precioCompra !== undefined && p.precioCompra > 0;
+    const pnl    = tienePrecioBase ? (precio - p.precioCompra) * p.nom : null;
+    const pnlPct = tienePrecioBase ? (precio - p.precioCompra)/p.precioCompra*100 : null;
+    return { ...p, precio, change, pnl, pnlPct,
+      pctHist: p.maxHist  ? (p.maxHist -precio)/precio*100 : null,
+      pct52w:  p.max52w   ? (p.max52w  -precio)/precio*100 : null,
+      pctObj:  p.pObj     ? (p.pObj    -precio)/precio*100 : null,
+      pr, pa, marketKey: h.key };
+  });
+
+  if (state.sortBy==='capital') data.sort((a,b)=>b.precio*b.nom - a.precio*a.nom);
+  if (state.sortBy==='change')  data.sort((a,b)=>b.change - a.change);
+  if (state.sortBy==='pctObj')  data.sort((a,b)=>(b.pctObj||0)-(a.pctObj||0));
+  if (state.view==='objetivos') data.sort((a,b)=>(b.pctObj||0)-(a.pctObj||0));
+
+  document.getElementById('cardsContainer').innerHTML = data.map(p => cardHTML(p, h)).join('');
+
+  document.querySelectorAll('.card-body').forEach(b =>
+    b.addEventListener('click', () => b.closest('.pos-card').classList.toggle('expanded'))
+  );
+}
+
+function stripConfig(pa, h) {
+  if (!pa || !pa.val || pa.val <= 0) return { label:'Sin cotización — tocá ↻ para actualizar', color:'var(--muted)', dot:'#AAAAAA', bg:'#F5F5F5' };
+  if (pa.tipo==='pre')   return { label:'⚡ PRE-MARKET · precio antes de la apertura',  color:'var(--orange)', dot:'#8B3A00', bg:'var(--orange-bg)' };
+  if (pa.tipo==='post')  return { label:'🌙 POST-MARKET · precio después del cierre',    color:'var(--purple)', dot:'#4A0099', bg:'var(--purple-bg)' };
+  if (h.key==='regular') return { label:'✅ TIEMPO REAL · mercado abierto',              color:'var(--green)',  dot:'#005C24', bg:'var(--green-bg)'  };
+  return { label:'Último precio de cierre', color:'var(--muted)', dot:'#888888', bg:'#F0F0F0' };
+}
+
+function cardHTML(p, h) {
+  const sc     = stripConfig(p.pa, h);
+  const cls    = p.change>0?'up':p.change<0?'down':'flat';
+  const pColor = p.change>0?'var(--green)':p.change<0?'var(--red)':'var(--text)';
+  const chSign = p.change>=0?'+':'';
+
+  // PnL badge
+  let pnlClass, pnlTxt;
+  if (p.pnl === null) {
+    pnlClass = 'even';
+    pnlTxt = 'Base: se fija al actualizar ↻';
+  } else {
+    pnlClass = p.pnl>0?'gain':p.pnl<0?'loss':'even';
+    pnlTxt = (p.pnl>=0?'+':'') + '$' + fmt(Math.abs(p.pnl),0) + ' (' + (p.pnlPct>=0?'+':'') + p.pnlPct.toFixed(1) + '%)';
+  }
+
+  // progress bars
+  const p52c  = (p.pct52w||0)<=0?'var(--green)':'var(--gold)';
+  const pObjc = (p.pctObj||0)<=0?'var(--green)':'var(--blue)';
+  const p52w  = p.pct52w!=null ? Math.min((p.pct52w<=0?100:100-p.pct52w/(p.pct52w+100)*100),100) : 0;
+  const pObj  = p.pctObj!=null ? Math.min((p.pctObj<=0?100:100-p.pctObj/(p.pctObj+100)*100),100) : 0;
+
+  const capUSD = (p.precio > 0) ? '$'+fmt(p.precio*p.nom,0) : '—';
+  const capARS = (p.precio > 0 && state.tc) ? '$'+fmt(p.precio*p.nom*state.tc/1000,0)+'K' : '—';
+  const rk     = (p.rating||'').replace(' ','');
+
+  // 3 prices
+  const prActivo = p.pr;
+  const reg   = prActivo?.price;
+  const pre   = prActivo?.preMarket;
+  const post  = prActivo?.postMarket;
+  const ms    = prActivo?.marketState || '';
+
+  function priceBox(label, val, active) {
+    return `<div class="price-box${active?' active-price':''}">
+      <div class="pb-label">${label}</div>
+      ${val ? `<div class="pb-val">$${val.toFixed(2)}</div>` : `<div class="pb-na">—</div>`}
+    </div>`;
+  }
+
+  const histBlock = p.pctHist != null
+    ? `<div class="detail-item">
+        <div class="d-label">Máx histórico</div>
+        <div class="d-val" style="color:var(--muted)">$${p.maxHist.toLocaleString('en-US')}</div>
+       </div>
+       <div class="detail-item">
+        <div class="d-label">% al máx hist.</div>
+        <div class="d-val" style="color:var(--muted)">${p.pctHist>=0?'+':''}${p.pctHist.toFixed(0)}%</div>
+       </div>` : '';
+
+  const objBlock = p.pctObj != null
+    ? `<div class="detail-item">
+        <div class="d-label">Precio objetivo</div>
+        <div class="d-val" style="color:var(--blue)">$${p.pObj.toFixed(2)}</div>
+       </div>
+       <div class="detail-item">
+        <div class="d-label">% al objetivo</div>
+        <div class="d-val" style="color:${pObjc}">${p.pctObj>=0?'+':''}${p.pctObj.toFixed(0)}%</div>
+       </div>` : '';
+
+  return `
+<div class="pos-card" id="card-${p.ticker}">
+  <div class="card-market-strip" style="background:${sc.bg};color:${sc.color}">
+    <div class="strip-dot" style="background:${sc.dot}"></div>
+    <span>${sc.label}</span>
+    <span class="strip-price" style="color:${sc.color}">${p.precio > 0 ? '$'+p.precio.toFixed(2) : ''}</span>
+  </div>
+  <div class="card-body">
+    <div class="card-main-row">
+      <div class="ticker-col">
+        <div class="ticker">${p.ticker}</div>
+        <div class="company">${p.empresa}</div>
+      </div>
+      <div class="var-col">
+        <span class="var-dia ${cls}">${chSign}${(p.change||0).toFixed(2)}% hoy</span>
+        <span class="var-compra ${varCompraClase}">${varCompraTxt}</span>
+      </div>
+      <div class="capital-col">
+        <div>
+          <span class="cap-usd">${capUSD ? '$'+capUSD : '—'}</span>
+          ${varDiaTxt ? `<span class="cap-usd-var" style="color:${p.change>=0?'var(--green)':'var(--red)'}">(${varDiaTxt})</span>` : ''}
+        </div>
+        <div>
+          <span class="cap-ars">${capARS ? '$'+capARS+'K' : '—'}</span>
+          ${varARSTxt ? `<span class="cap-ars-var" style="color:${p.change>=0?'var(--green)':'var(--red)'}">(${varARSTxt})</span>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="obj-section">
+      ${(()=>{
+        function objRow(label, pct, precioObj, color) {
+          if (pct == null || !isFinite(pct) || !p.precio || p.precio <= 0 || !precioObj) return '';
+          const fill = Math.min(pct<=0 ? 100 : 100-(pct/(pct+100)*100), 100);
+          const deltaUSD = precioObj - p.precio;
+          const signo = pct>=0?'+':'';
+          return `<div class="obj-row">
+            <span class="obj-label">${label}</span>
+            <div class="obj-bar-wrap"><div class="obj-bar-fill" style="width:${fill}%;background:${color}"></div></div>
+            <div class="obj-numbers">
+              <div class="obj-pct" style="color:${color}">${signo}${pct.toFixed(1)}%</div>
+              <div class="obj-usd">${deltaUSD>=0?'+':''}$${Math.abs(deltaUSD).toFixed(2)} USD</div>
+            </div>
+          </div>`;
+        }
+        return objRow('MÁX 52W', p.pct52w, p.max52w, 'var(--gold)') +
+               objRow('OBJETIVO', p.pctObj, p.pObj, 'var(--blue)');
+      })()}
+    </div>
+  </div>
+  <div class="detail-panel">
+    <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Los 3 precios</div>
+    <div class="three-prices">
+      ${priceBox('Pre-Market',  pre,  ms==='PRE')}
+      ${priceBox('Mercado',     reg,  ms==='REGULAR'||ms==='')}
+      ${priceBox('Post-Market', post, ms==='POST')}
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="d-label">Precio base</div>
+        <div class="d-val" style="color:var(--muted)">${p.precioCompra ? '$'+p.precioCompra.toFixed(2) : 'Pendiente ↻'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="d-label">Nominales</div>
+        <div class="d-val" style="color:var(--muted)">${p.nom}</div>
+      </div>
+      ${histBlock}
+      ${objBlock}
+    </div>
+    ${rk?`<span class="rating-pill ${rk}">${p.rating}</span>`:''}
+    <div class="card-actions">
+      <button class="card-btn card-btn-edit" onclick="abrirModalEditar('${p.ticker}')">✏️ Editar posición</button>
+      <button class="card-btn card-btn-del" onclick="abrirDeleteModal('${p.ticker}')">🗑 Eliminar</button>
+    </div>
+  </div>
+</div>`;
+}
+
+// ── MODAL AGREGAR ─────────────────────────────────────────────
+function abrirModalAgregar() {
+  state.editingTicker = null;
+  document.getElementById('modalTitle').textContent = 'Agregar posición';
+  document.getElementById('editTabs').classList.add('hidden');
+  document.getElementById('tickerGroup').style.display = 'block';
+  document.getElementById('inputTicker').value = '';
+  document.getElementById('inputCantidad').value = '';
+  document.getElementById('inputPrecioCompra').value = '';
+  document.getElementById('labelCantidad').textContent = 'Cantidad de nominales';
+  document.getElementById('modalSaveBtn').textContent = 'Agregar';
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('inputTicker').focus(), 300);
+}
+
+function abrirModalEditar(ticker) {
+  const pos = state.cartera.find(p=>p.ticker===ticker);
+  if (!pos) return;
+  state.editingTicker = ticker;
+  state.editTab = 'sumar';
+  document.getElementById('modalTitle').textContent = 'Editar · '+ticker;
+  document.getElementById('editTabs').classList.remove('hidden');
+  document.getElementById('tickerGroup').style.display = 'none';
+  document.getElementById('tabSumar').classList.add('active');
+  document.getElementById('tabReemplazar').classList.remove('active');
+  document.getElementById('inputCantidad').value = '';
+  document.getElementById('inputPrecioCompra').value = pos.precioCompra||'';
+  document.getElementById('labelCantidad').textContent = 'Cantidad a sumar';
+  document.getElementById('modalSaveBtn').textContent = 'Guardar';
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('inputCantidad').focus(), 300);
+}
+
+function setEditTab(tab) {
+  state.editTab = tab;
+  document.getElementById('tabSumar').classList.toggle('active', tab==='sumar');
+  document.getElementById('tabReemplazar').classList.toggle('active', tab==='reemplazar');
+  document.getElementById('labelCantidad').textContent = tab==='sumar' ? 'Cantidad a sumar' : 'Nueva cantidad total';
+  document.getElementById('inputCantidad').value = '';
+}
+
+async function guardarPosicion() {
+  const cant   = parseFloat(document.getElementById('inputCantidad').value);
+  const precio = parseFloat(document.getElementById('inputPrecioCompra').value);
+
+  if (isNaN(cant) || cant <= 0) { mostrarToast('⚠️ Ingresá una cantidad válida'); return; }
+  if (isNaN(precio) || precio <= 0) { mostrarToast('⚠️ Ingresá un precio de compra válido'); return; }
+
+  if (!state.editingTicker) {
+    // AGREGAR NUEVO
+    const ticker = document.getElementById('inputTicker').value.trim().toUpperCase();
+    if (!ticker) { mostrarToast('⚠️ Ingresá el ticker'); return; }
+    if (state.cartera.find(p=>p.ticker===ticker)) { mostrarToast('⚠️ Ya existe esa posición'); return; }
+
+    document.getElementById('modalSaveBtn').textContent = 'Buscando...';
+    const pr = await fetchPrecio(ticker);
+
+    const nueva = {
+      ticker, empresa: pr.name || ticker,
+      nom: cant, precioCompra: precio,
+      maxHist: null, max52w: null, pObj: null, rating: null,
+    };
+    state.cartera.push(nueva);
+    if (pr.price) state.precios[ticker] = pr;
+
+  } else {
+    // EDITAR EXISTENTE
+    const pos = state.cartera.find(p=>p.ticker===state.editingTicker);
+    if (!pos) return;
+
+    if (state.editTab === 'sumar') {
+      // Precio promedio ponderado
+      const totalAnterior = (pos.precioCompra||0) * pos.nom;
+      const totalNuevo    = precio * cant;
+      pos.nom += cant;
+      pos.precioCompra = (totalAnterior + totalNuevo) / pos.nom;
+    } else {
+      pos.nom          = cant;
+      pos.precioCompra = precio;
+    }
+  }
+
+  guardarCarteraLS();
+  cerrarModalDirecto();
+  renderizarTodo();
+  mostrarToast(state.editingTicker ? '✅ Posición actualizada' : '✅ Ticker agregado');
+  state.editingTicker = null;
+}
+
+function cerrarModal(e) { if (e.target===document.getElementById('modalOverlay')) cerrarModalDirecto(); }
+function cerrarModalDirecto() { document.getElementById('modalOverlay').classList.add('hidden'); }
+
+// ── MODAL ELIMINAR ────────────────────────────────────────────
+function abrirDeleteModal(ticker) {
+  state.deletingTicker = ticker;
+  document.getElementById('deleteMsg').textContent = `¿Seguro que querés eliminar ${ticker} de tu cartera?`;
+  document.getElementById('deleteOverlay').classList.remove('hidden');
+}
+function cerrarDeleteModal(e) { if (e.target===document.getElementById('deleteOverlay')) cerrarDeleteModalDirecto(); }
+function cerrarDeleteModalDirecto() { document.getElementById('deleteOverlay').classList.add('hidden'); state.deletingTicker=null; }
+function confirmarEliminar() {
+  if (!state.deletingTicker) return;
+  state.cartera = state.cartera.filter(p=>p.ticker!==state.deletingTicker);
+  delete state.precios[state.deletingTicker];
+  guardarCarteraLS();
+  cerrarDeleteModalDirecto();
+  renderizarTodo();
+  mostrarToast('🗑 Posición eliminada');
+}
+
+// ── SORT / VIEW ───────────────────────────────────────────────
+const sortModes  = ['capital','change','pctObj'];
+const sortLabels = ['Capital ↓','Var. Día ↓','Objetivo ↓'];
+let sortIdx = 0;
+function toggleSort() {
+  sortIdx = (sortIdx+1) % sortModes.length;
+  state.sortBy = sortModes[sortIdx];
+  document.getElementById('sortBtn').textContent = sortLabels[sortIdx];
+  renderCards();
+}
+
+function setView(v) {
+  state.view = v;
+  document.querySelectorAll('.nav-item').forEach((el,i)=>
+    el.classList.toggle('active',['cartera','objetivos','horario'][i]===v)
+  );
+  renderCards();
+}
+
+function verHorario() {
+  const h = horario();
+  alert('🕐 Horario NYSE\n\n'+h.label+'\n'+h.sub+'\n\n'+
+    '08:00 – 10:30  Pre-Market\n'+
+    '10:30 – 17:00  Mercado abierto\n'+
+    '17:00 – 21:00  Post-Market\n'+
+    '21:00 – 08:00  Cerrado\n\n'+
+    '(Hora Argentina — UTC-3)');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function fmt(n,dec=0){ return n.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+
+function cerrarBanner() {
+  document.getElementById('installBanner').classList.add('hidden');
+  try { localStorage.setItem('bannerdismissed','1'); } catch(e) {}
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+async function init() {
+  const standalone = window.navigator.standalone===true||window.matchMedia('(display-mode:standalone)').matches;
+  let dismissed=false;
+  try{dismissed=!!localStorage.getItem('bannerdismissed')}catch(e){}
+  if(standalone||dismissed) document.getElementById('installBanner').classList.add('hidden');
+
+  renderBanner(horario());
+  renderizarTodo();
+  setTimeout(()=>document.getElementById('loader').classList.add('hidden'), 600);
+
+  await actualizarTodo();
+
+  // auto-refresh cada 5 min
+  setInterval(()=>{ if(!document.hidden) actualizarTodo(); }, 5*60*1000);
+  // actualizar banner de horario cada minuto
+  setInterval(()=>renderBanner(horario()), 60*1000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
